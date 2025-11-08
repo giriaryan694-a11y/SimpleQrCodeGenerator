@@ -3,18 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Responsive QR Code Generator</title>
+<title>Simple QR Code Generator</title>
 <style>
   body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background: #f4f4f4;
     padding: 50px 20px;
+    transition: background 0.3s, color 0.3s;
   }
-  h1 {
+  body.light {
+    background: #f4f4f4;
     color: #333;
   }
-  input, button {
+  body.dark {
+    background: #1a1a1a;
+    color: #eee;
+  }
+  h1 {
+    margin-bottom: 20px;
+  }
+  input, button, select {
     padding: 10px;
     font-size: 16px;
     margin: 5px;
@@ -27,16 +35,19 @@
   footer {
     margin-top: 50px;
     font-size: 14px;
-    color: #555;
+    color: inherit;
   }
 </style>
 </head>
 <body>
-
 <h1>Simple QR Code Generator</h1>
-<input type="text" id="textInput" placeholder="Enter text or URL">
-<br>
-<button onclick="generateQR()">Generate QR Code</button>
+
+<input type="text" id="textInput" placeholder="Enter text or URL"><br>
+<button onclick="generateQR()">Generate QR Code</button><br>
+<select id="themeSelect" onchange="changeTheme(this.value)">
+  <option value="light">Light Theme</option>
+  <option value="dark">Dark Theme</option>
+</select>
 
 <canvas id="qrcode"></canvas>
 
@@ -44,6 +55,40 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <script>
+// Cookie helpers
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i=0;i < ca.length;i++) {
+        let c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+// Apply theme on load
+window.onload = function() {
+    const savedTheme = getCookie("theme") || "light";
+    document.body.className = savedTheme;
+    document.getElementById("themeSelect").value = savedTheme;
+};
+
+function changeTheme(theme) {
+    document.body.className = theme;
+    setCookie("theme", theme, 30);
+}
+
+// Generate responsive QR code
 function generateQR() {
     const text = document.getElementById('textInput').value.trim();
     if (!text) {
@@ -51,20 +96,19 @@ function generateQR() {
         return;
     }
 
-    // Detect screen width and adjust QR size
     let size = window.innerWidth < 500 ? window.innerWidth * 0.7 : 300;
 
-    const qr = new QRious({
+    new QRious({
         element: document.getElementById('qrcode'),
         value: text,
         size: size,
         level: 'H',
-        background: '#fff',
-        foreground: '#000'
+        background: document.body.className === "dark" ? "#333" : "#fff",
+        foreground: document.body.className === "dark" ? "#eee" : "#000"
     });
 }
 
-// Optional: regenerate QR code on window resize for better responsiveness
+// Optional: regenerate QR code on window resize
 window.addEventListener('resize', () => {
     const canvas = document.getElementById('qrcode');
     if (canvas && canvas.width > 0 && document.getElementById('textInput').value.trim()) {
@@ -72,6 +116,5 @@ window.addEventListener('resize', () => {
     }
 });
 </script>
-
 </body>
 </html>
