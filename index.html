@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsive QR Code Generator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f4f4f4;
+    padding: 50px 20px;
+  }
+  h1 {
+    color: #333;
+  }
+  input, button {
+    padding: 10px;
+    font-size: 16px;
+    margin: 5px;
+    width: 300px;
+    max-width: 90%;
+  }
+  #qrcode {
+    margin-top: 20px;
+  }
+  footer {
+    margin-top: 50px;
+    font-size: 14px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<h1>Simple QR Code Generator</h1>
+<input type="text" id="textInput" placeholder="Enter text or URL">
+<br>
+<button onclick="generateQR()">Generate QR Code</button>
+
+<canvas id="qrcode"></canvas>
+
+<footer>Made by Aryan Giri</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script>
+function generateQR() {
+    const text = document.getElementById('textInput').value.trim();
+    if (!text) {
+        alert('Please enter some text or URL!');
+        return;
+    }
+
+    // Detect screen width and adjust QR size
+    let size = window.innerWidth < 500 ? window.innerWidth * 0.7 : 300;
+
+    const qr = new QRious({
+        element: document.getElementById('qrcode'),
+        value: text,
+        size: size,
+        level: 'H',
+        background: '#fff',
+        foreground: '#000'
+    });
+}
+
+// Optional: regenerate QR code on window resize for better responsiveness
+window.addEventListener('resize', () => {
+    const canvas = document.getElementById('qrcode');
+    if (canvas && canvas.width > 0 && document.getElementById('textInput').value.trim()) {
+        generateQR();
+    }
+});
+</script>
+
+</body>
+</html>
